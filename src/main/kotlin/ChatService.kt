@@ -1,25 +1,61 @@
 class ChatService {
-    val chats: MutableList<Chat> = mutableListOf()
+    private var chats: MutableList<Chat> = mutableListOf()
+
+    private fun findChatById(chatId: Int): Chat? {
+        return chats.find { it.chatId == chatId }
+    }
+
+    fun resetService() {
+        chats.clear()
+    }
+
 
     fun addMessage(chatId: Int, textMessage: String) {
-        val chat = chats.find { it.chatId == chatId }
+        val chat = findChatById(chatId)
         if (chat != null) {
-            chat.messages.add(Message(textMessage))
+            chat.addMessage(textMessage)
             println("Сообщение добавлено в чат $chatId")
         } else {
             val newChat = Chat(chatId)
-            newChat.messages.add(Message(textMessage))
+            newChat.addMessage(textMessage)
             chats.add(newChat)
             println("Чат с ID $chatId создан, сообщение добавлено")
         }
     }
 
-    fun showChat(chatId: Int) {
-        val chat = chats.find { it.chatId == chatId }
-        if (chat != null) {
-            println(chat)
+    fun deleteChat(chatId: Int) {
+        val isRemoved = chats.removeIf { it.chatId == chatId }
+        if (isRemoved) {
+            println("Чат с ID $chatId удалён.")
         } else {
-            println("Чат не найден")
+            println("Чат с ID $chatId не найден.")
         }
+    }
+
+
+    fun showChat(chatId: Int) {
+        val chat = findChatById(chatId)
+        if (chat != null) {
+            if (chat.messages.isEmpty()) {
+                println("Чат c ID ${chat.chatId} пуст.")
+            } else {
+                println("Сообщения чата ID: ${chat.chatId}, всего ${chat.getMessageCount()} шт.")
+                chat.messages.forEach { message ->
+                    val readStatus = if (message.isRead) "Прочитано" else "Непрочитано"
+                    println("${message.messageId}: ${message.textMessage} ($readStatus)")
+                }
+                chat.markMessagesAsRead()
+            }
+        } else {
+            println("Чат c ID $chatId не найден")
+        }
+    }
+
+    fun getChatListWithUnreadMessages(): List<Chat> {
+        return chats.filter { it.hasUnreadMessages() }
+    }
+
+    fun getChatList(): List<Chat> {
+        return chats
     }
 }

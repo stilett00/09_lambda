@@ -1,3 +1,5 @@
 data class Message (
-    val textMessage: String
+    val messageId: Int,
+    val textMessage: String,
+    var isRead: Boolean = false
 )
