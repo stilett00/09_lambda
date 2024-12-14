@@ -15,4 +15,12 @@ fun  main() {
 
     chatService.addMessage(2, "Должно быть непрочитанное сообщение")
 
+    chatService.deleteMessage(1, 2)
+    chatService.showChat(1)
+
+    val lastMessages = chatService.getLastMessages()
+    lastMessages.forEach { println(it) }
+
+    val messages = chatService.getMessagesFromChat(1, 3)
+    messages.forEach { println(it) }
 }

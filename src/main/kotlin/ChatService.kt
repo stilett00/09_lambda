@@ -5,10 +5,6 @@ class ChatService {
         return chats.find { it.chatId == chatId }
     }
 
-    fun resetService() {
-        chats.clear()
-    }
-
 
     fun addMessage(chatId: Int, textMessage: String) {
         val chat = findChatById(chatId)
@@ -22,6 +18,52 @@ class ChatService {
             println("Чат с ID $chatId создан, сообщение добавлено")
         }
     }
+
+    fun getLastMessages(): List<String> {
+        return chats.map { chat ->
+            if (chat.messages.isNotEmpty()) {
+                val lastMessage = chat.messages.last()
+                "Чат ${chat.chatId}: ${lastMessage.textMessage}"
+            } else {
+                "Чат ${chat.chatId}: нет сообщений"
+            }
+        }
+    }
+
+
+    fun getMessagesFromChat(chatId: Int, messageCount: Int): List<String> {
+        val chat = findChatById(chatId)
+        if (chat != null) {
+            if (chat.messages.isEmpty()) {
+                println("Чат c ID $chatId пуст.")
+                return emptyList()
+            }
+
+            val messagesToReturn = chat.messages.takeLast(messageCount)
+
+            messagesToReturn.forEach { it.isRead = true }
+            return messagesToReturn.map { "${it.messageId}: ${it.textMessage}" }
+        } else {
+            println("Чат c ID $chatId не найден.")
+            return emptyList()
+        }
+    }
+
+
+    fun deleteMessage(chatId: Int, messageId: Int) {
+        val chat = findChatById(chatId)
+        if (chat != null) {
+            val isRemoved = chat.deleteMessage(messageId)
+            if (isRemoved) {
+                println("Сообщение с ID $messageId удалено из чата $chatId.")
+            } else {
+                println("Сообщение с ID $messageId не найдено в чате $chatId.")
+            }
+        } else {
+            println("Чат с ID $chatId не найден.")
+        }
+    }
+
 
     fun deleteChat(chatId: Int) {
         val isRemoved = chats.removeIf { it.chatId == chatId }

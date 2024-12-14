@@ -30,4 +30,8 @@ data class Chat (
     fun markMessagesAsRead() {
         messages.forEach { it.isRead = true }
     }
+
+    fun deleteMessage(messageId: Int): Boolean {
+        return messages.removeIf { it.messageId == messageId }
+    }
 }
