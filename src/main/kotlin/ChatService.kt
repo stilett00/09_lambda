@@ -19,19 +19,26 @@ class ChatService {
         }
     }
 
-    fun getLastMessages(): List<String> {
-        return chats.map { chat ->
-            if (chat.messages.isNotEmpty()) {
-                val lastMessage = chat.messages.last()
-                "Чат ${chat.chatId}: ${lastMessage.textMessage}"
-            } else {
-                "Чат ${chat.chatId}: нет сообщений"
-            }
-        }
+    fun getLastMessages(): List<Message> {
+        return chats
+            .asSequence()
+            .mapNotNull { chat -> chat.messages.lastOrNull() }
+            .toList()
     }
 
+//    fun getLastMessages(): List<String> {
+//        return chats.map { chat ->
+//            if (chat.messages.isNotEmpty()) {
+//                val lastMessage = chat.messages.last()
+//                "Чат ${chat.chatId}: ${lastMessage.textMessage}"
+//            } else {
+//                "Чат ${chat.chatId}: нет сообщений"
+//            }
+//        }
+//    }
 
-    fun getMessagesFromChat(chatId: Int, messageCount: Int): List<String> {
+
+    fun getMessagesFromChat(chatId: Int, messageCount: Int): List<Message> {
         val chat = findChatById(chatId)
         if (chat != null) {
             if (chat.messages.isEmpty()) {
@@ -39,15 +46,36 @@ class ChatService {
                 return emptyList()
             }
 
-            val messagesToReturn = chat.messages.takeLast(messageCount)
+            // Используем drop для пропуска первых сообщений, а затем берем нужное количество последних
+            val messagesToReturn = chat.messages.asSequence()
+                .drop(maxOf(0, chat.messages.size - messageCount))  // Пропускаем сообщения, оставляя последние
+                .onEach { it.isRead = true }
 
-            messagesToReturn.forEach { it.isRead = true }
-            return messagesToReturn.map { "${it.messageId}: ${it.textMessage}" }
+            return messagesToReturn.toList()
         } else {
             println("Чат c ID $chatId не найден.")
             return emptyList()
         }
     }
+
+//    fun getMessagesFromChat(chatId: Int, messageCount: Int): List<String> {
+//        val chat = findChatById(chatId)
+//        if (chat != null) {
+//            if (chat.messages.isEmpty()) {
+//                println("Чат c ID $chatId пуст.")
+//                return emptyList()
+//            }
+//
+//            val messagesToReturn = chat.messages.takeLast(messageCount)
+//
+//
+//            messagesToReturn.forEach { it.isRead = true }
+//            return messagesToReturn.map { "${it.messageId}: ${it.textMessage}" }
+//        } else {
+//            println("Чат c ID $chatId не найден.")
+//            return emptyList()
+//        }
+//    }
 
 
     fun deleteMessage(chatId: Int, messageId: Int) {
